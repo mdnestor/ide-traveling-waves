@@ -9,9 +9,9 @@ os.system("mkdir ./figures/")
 
 print("creating figures...")
 
-os.system("python3 ./src/fig1.py")
-os.system("python3 ./src/fig2.py")
-os.system("python3 ./src/fig3.py")
+os.system("python ./src/fig1.py")
+os.system("python ./src/fig2.py")
+os.system("python ./src/fig3.py")
 
 # run biber and create manuscript twice
 for _ in range(2):
