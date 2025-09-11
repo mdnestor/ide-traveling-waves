@@ -1,6 +1,7 @@
 import numpy
 from scipy import ndimage
 from typing import *
+import matplotlib.pyplot as plt
 
 # TODO: replace n_domain_radius and n_kernel_radius with floats, its more interpretable
 # TODO: i think next steps, it let u* be the largest fixed point of g(u,a,r)
@@ -106,7 +107,7 @@ def classify_vortkamp_map(r: float, a: float) -> dict:
     """
     if r < 0:
         raise ValueError(f"r = {r} but must be nonnegative.")
-    if a <= 0 or a > 1:
+    if a < 0 or a > 1:
         raise ValueError(f"a = {a} but must be in (0, 1].")
     
     # prefill result
@@ -116,6 +117,9 @@ def classify_vortkamp_map(r: float, a: float) -> dict:
         'cycle': None,
         'period': None
     }
+    if a == 0:
+        return data
+
     
     data['zero_stable'] = r > 0
     if not data['zero_stable']:
@@ -639,7 +643,7 @@ def estimate_leading_vortkamp_wavespeed_heatmap():
     plt.title('Heatmap of Estimated Leading Vortkamp Wavespeed')
     plt.show()
 
-estimate_leading_vortkamp_wavespeed_heatmap()
+#estimate_leading_vortkamp_wavespeed_heatmap()
 
 #a = 0.7
 #r = 5.5
@@ -768,6 +772,172 @@ def estimate_vortkamp_general_wavespeed_pipeline(r: float, a: float) -> dict:
         'c1_estimate': c1_estimate,
         'c2_estimate': c2_estimate,
     }
+
+# use a continuation to estimate wavespeed
+def capture_leading_wave_continuation(
+    r: float,
+    a: float,
+    kernel_density_fn: Callable,
+    T0: int,
+    T1: int,
+    T2: int,
+    domain_radius: float,
+    dx: float,
+    kernel_radius: float,
+    normalize_kernel=True
+):
+    
+    assert((domain_radius / dx).is_integer())
+    assert((kernel_radius / dx).is_integer())
+    n_domain_radius = int(domain_radius / dx)
+    domain = numpy.arange(-domain_radius, domain_radius + dx, dx)
+    kernel_domain = numpy.arange(-kernel_radius, kernel_radius + dx, dx)
+
+    kernel = kernel_density_fn(kernel_domain)
+    if normalize_kernel:
+        kernel /= numpy.sum(kernel)
+
+    initial_data = lambda x: numpy.heaviside(-x, 1)
+    soln = numpy.zeros((T2 + 1, len(domain)))
+    soln[0] = initial_data(domain)
+
+    r0 = a / (1 - a)
+    # starting r (based on Vortkamp map)
+    for t in range(T2):
+        if t < T0:
+            r_t = r0
+        elif t < T1:
+            r_t = r0 + (t - T0) / (T1 - T0) * (r - r0)
+        else:
+            r_t = r
+        growth_map = vortkamp_map(r_t, a)
+        u = soln[t]
+        u = ndimage.convolve(growth_map(u), kernel, mode='nearest')
+        # estimate position
+        l = 0.5
+        i = numpy.where(numpy.abs(u) >= l)[0][-1]
+        # assume positive?
+        di = i - n_domain_radius
+        #print(di)
+        #assume di > 0
+        # chop di from left, add di to right
+        if di >= 0:
+            u = u[di:]
+            u = numpy.concat([u, [0]*di])
+        else:
+            u = u[:(di)]
+            u = numpy.concat([[1]*(-di), u])
+
+        # set boundary data
+        u[0] = growth_map(u[0])
+        u[-1] = growth_map(u[-1])
+        soln[t + 1] = u
+
+    return {
+        'domain': domain,
+        'solution': soln,
+        'c_estimate': di*dx
+    }
+
+def simulate_leading_wave_continuation(
+    r: float,
+    a: float,
+    kernel_density_fn: Callable,
+    T0: int,
+    T1: int,
+    T2: int,
+    domain_radius: float,
+    dx: float,
+    kernel_radius: float,
+    normalize_kernel=True
+):
+    
+    assert((domain_radius / dx).is_integer())
+    assert((kernel_radius / dx).is_integer())
+    n_domain_radius = int(domain_radius / dx)
+    domain = numpy.arange(-domain_radius, domain_radius + dx, dx)
+    kernel_domain = numpy.arange(-kernel_radius, kernel_radius + dx, dx)
+
+    kernel = kernel_density_fn(kernel_domain)
+    if normalize_kernel:
+        kernel /= numpy.sum(kernel)
+
+    initial_data = lambda x: numpy.heaviside(-x, 1)
+    soln = numpy.zeros((T2 + 1, len(domain)))
+    soln[0] = initial_data(domain)
+
+    r0 = a / (1 - a)
+    marks = []
+    # starting r (based on Vortkamp map)
+    for t in range(T2):
+        if t < T0:
+            r_t = r0
+        elif t < T1:
+            r_t = r0 + (t - T0) / (T1 - T0) * (r - r0)
+        else:
+            r_t = r
+        growth_map = vortkamp_map(r_t, a)
+        u = soln[t]
+        u = ndimage.convolve(growth_map(u), kernel, mode='nearest')
+        # estimate position
+        #l = 0.5
+        #i = numpy.where(numpy.abs(u) >= l)[0][-1]
+        # assume positive?
+        #di = i - n_domain_radius
+        #print(di)
+        #assume di > 0
+        # chop di from left, add di to right
+        #if di >= 0:
+        #    u = u[di:]
+        #    u = numpy.concat([u, [0]*di])
+        #else:
+        #    u = u[:(di)]
+        #    u = numpy.concat([[1]*(-di), u])
+
+        # set boundary data
+        # fetch leading wave mark?
+        l = a / 2
+        if t % 2 == 0:
+            i = numpy.where(numpy.abs(u) >= l)[0][-1]
+            marks.append(i)
+
+        u[0] = growth_map(u[0])
+        u[-1] = growth_map(u[-1])
+        soln[t + 1] = u
+    marks = [-domain_radius +mark*dx for mark in marks]
+    return {
+        'domain': domain,
+        'solution': soln,
+        'marks': marks
+    }
+    
+# # try with some known parameters...
+# T0 = 10
+# T1= 20
+# T2 = 40
+# solution = capture_leading_wave_continuation(
+#     r=3/4,
+#     a=0.25,
+#     kernel_density_fn=laplace_kernel(),
+#     T0=T0,
+#     T1=T1,
+#     T2=T2,
+#     domain_radius=50,
+#     dx=0.01,
+#     kernel_radius=4,
+#     normalize_kernel=True
+# )
+# print(solution['c_estimate'])
+# import matplotlib.pyplot as plt
+# plt.imshow(solution['solution'], aspect='auto')
+# plt.show()
+
+# #for t in range(T2):
+# #    plt.plot(solution['solution'][t], color=(t/500, 1-t/500, 0))
+
+# #plt.show()
+    
+
 
 
 #if __name__ == '__main__':
@@ -907,3 +1077,523 @@ if __name__ != '__main__':
     # ax.set_ylabel('a')
     # fig.colorbar(im, ax=ax, label='|c1 - c2|')
     # plt.show()
+
+
+def generate_growth_map_figure():
+
+    a = 0.5
+    r = 1
+    import matplotlib.pyplot as plt
+    g = vortkamp_map(r, a)
+    u = numpy.linspace(0, 1.2, 400)
+
+    plt.figure(figsize=(6,4))
+    plt.plot(u, g(u), label=f"a = {a}, r = {r}", color="blue")
+    plt.plot(u, u, linestyle="--", color="black")
+    r = 3
+    g = vortkamp_map(r, a)
+    plt.plot(u, g(u), label=f"a = {a}, r = {r}", color="red")
+
+    fixed = [0, a, 1]
+    plt.plot(fixed, fixed, "o", color="black", markersize=6)
+
+    plt.grid(False)
+    plt.xlabel("u(t)")
+    plt.ylabel("u(t + 1)", rotation=0, labelpad=15)
+    plt.legend()
+    plt.xticks(fixed, ["0", "a", "1"])
+    plt.yticks(fixed, ["0", "a", "1"])
+    plt.gca().set_aspect("equal", adjustable="box")
+
+    plt.savefig("figures/growthmap.png", dpi=300, bbox_inches="tight")
+
+def generate_timeseries_figures():
+    # time series for the two primary cases of interest
+    import matplotlib.pyplot as plt
+    for (i, params) in enumerate([(0.1, 0.23), (0.25, 0.75)]):
+        a, r = params
+        # find initial data
+        map_data = classify_vortkamp_map(r, a)
+        if not map_data['period'] == 2:
+            raise ValueError()
+        u_plus, u_minus = map_data['cycle']
+        #u_minus = g(u_plus)
+        solution = solve_ide(
+            growth_map = vortkamp_map(r, a),
+            kernel_density_fn=laplace_kernel(),
+            initial_data=lambda x: u_plus * numpy.heaviside(-x, 1),
+            xmin=-10,
+            xmax=100,
+            kernel_radius=4,
+            dx=0.01,
+            n_steps=100
+        )
+        # plot heatmap
+        plt.figure()
+
+
+        # # define the colormap function...
+        # def rgb_func(u):
+        #     r = u
+        #     g = 1 - u
+        #     b = 0.5*numpy.sin(4*numpy.pi*u) + 0.5
+        #     return r, g, b
+
+        # # Sample it
+        # u = numpy.linspace(0,1,256)
+
+        # Example usage:
+        from matplotlib.colors import LinearSegmentedColormap
+
+        points = [
+            (0, (1, 1, 1)),   # red at 0.2
+            #(a, (1, 0.5, 0)),   # red at 0.2
+            (u_minus, (1, 0.5, 0)),
+            (1, (1, 0, 0)),   # green at 0.5
+            (u_plus, (0, 0, 1))    # blue at 0.8
+        ]
+        #print(points)
+        u_min, u_max = points[0][0], points[-1][0]
+        points_norm = [((u - u_min) / (u_max - u_min), c) for u, c in points]
+
+        # Extract positions and colors
+        us, cs = zip(*points_norm)
+
+        # Build colormap
+        cmap = LinearSegmentedColormap.from_list("linear_custom", list(zip(us, cs)), N=256)
+
+        
+
+        #cmap = LinearSegmentedColormap.from_list("my_map", colors, N=256)
+
+        #plt.imshow(Z, cmap=cmap, origin="lower")
+        #plt.text(0.1, 50, "≈ 1", color="red", fontsize=12, ha="left", va="center")
+        #plt.text(0.8, 20, "≈ u+", color="blue", fontsize=12, ha="right", va="center")
+        import matplotlib.patches as mpatches
+
+        red_patch = mpatches.Patch(color=(1,0,0), label="u(x, t) ≈ 1")
+        blue_patch = mpatches.Patch(color=(0,0,1), label="u(x, t) ≈ u+")
+        white_patch = mpatches.Patch(color=(1, 1,1), label="u(x, t) ≈ 0")
+        plt.legend(handles=[red_patch, blue_patch, white_patch], loc="upper right")
+        
+
+        im = plt.imshow(solution['solution'][::2,:], extent=[solution['domain'][0], solution['domain'][-1], len(solution['solution']), 0], cmap=cmap, aspect='auto', interpolation='none')
+        cbar = plt.colorbar(im)
+        #cbar.set_label("u", rotation=0)
+        cbar.set_ticks([0, a, u_minus, 1, u_plus])
+        cbar.set_ticklabels(["0", f"a = {a}", f"u- ≈ {u_minus:.2f}", "1", f"u+ ≈ {u_plus:.2f}"])
+        plt.xlabel("location, x")
+        plt.ylabel("time, t (even)", rotation=0, labelpad=20)
+        plt.savefig(f"figures/example_spacetime{i}.png", dpi=300, bbox_inches="tight")
+
+def generate_leading_trailing_heatmap():
+    # idea: for a range of (a, r) values
+    # calculate the leading wavefront, the trailing wavefront, etc
+    a_vals = numpy.linspace(0.1, 0.6, 150)
+    r_vals = numpy.linspace(0.1, 3, 150)
+    #r_vals = []
+    outputs = {}
+    for a in a_vals:
+        for r in r_vals:
+            # do thing
+            map_data = classify_vortkamp_map(r, a)
+            if map_data['cycle'] is None:
+                continue
+            if map_data['period'] == 1:
+                continue
+            if map_data['period'] != 2:
+                continue
+            
+            u_plus = map_data['cycle'][0]
+
+            # set up IVP
+            #g = vortkamp_map(r, a)
+            #u = [1 + 0.001]
+            #for t in range(100):
+            #    u.append(g(u[-1]))
+            #u_plus = max(u)
+            #print(u_plus)
+
+            n_transient_steps = 0
+            assert(n_transient_steps % 2 == 0)
+            
+            
+            # g = vortkamp_map(r, a)
+            #u_plus = classification['u_plus']
+            dx = 0.02 # TODO
+            g = vortkamp_map(r, a)
+            tol = min(u_plus - 1, a) / 10
+            soln = solve_ide_step_data_adaptive(
+                growth_map = g,
+                kernel_density_fn = laplace_kernel(), # todo
+                u_left = u_plus,
+                u_right = 0,
+                dx = dx,
+                kernel_radius = 4,
+                n_steps = 30,
+                tol = tol, # TODO
+                normalize_kernel = True
+            )
+            domain = soln['domain']
+            soln = soln['solution']
+            xmin = min(domain)
+            
+            soln = soln[n_transient_steps:,:]
+
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t]) >= tol)[0][-1]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            #print(marks[-1])
+            c1_estimate = (marks[-1] - marks[-2])
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t] - soln[t][0]) >= tol)[0][0]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            c2_estimate = (marks[-1] - marks[-3]) / 2
+
+            outputs[(r, a)] = {
+                'domain': domain,
+                'solution': soln,
+                'c1_estimate': c1_estimate,
+                'c2_estimate': c2_estimate,
+            }
+
+            # if
+            #if c1_estimate - c2_estimate > 0.5:
+            #    plt.imshow(soln, aspect='auto')
+            #    plt.show()
+
+    #for ((r, a), output) in outputs.items():
+    #    print(r, a, output)
+    
+
+    import matplotlib.colors as mcolors
+
+    divnorm = mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
+    heatmap = numpy.full((len(a_vals), len(r_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(r_vals):
+            if (r, a) in outputs:
+                heatmap[i, j] = outputs[(r, a)]['c1_estimate']
+
+    # Plot
+    plt.figure(figsize=(8,6))
+    cmap = plt.get_cmap("seismic").copy()  # or whatever cmap you're using
+    cmap.set_bad(color="0.5")  # "0.5" = grey
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[r_vals[0], r_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        norm=divnorm
+    )
+    plt.colorbar(im)#, label="c1 estimate")
+    plt.xlabel("r")
+    plt.ylabel("a")
+    #plt.title("Heatmap of c1_estimate")
+    plt.savefig(f"figures/c1est.png", dpi=300, bbox_inches="tight")
+
+    heatmap = numpy.full((len(a_vals), len(r_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(r_vals):
+            if (r, a) in outputs:
+                heatmap[i, j] = outputs[(r, a)]['c2_estimate']
+
+    # Plot
+    plt.figure(figsize=(8,6))
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[r_vals[0], r_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        norm=divnorm
+    )
+    plt.colorbar(im)#, label="c2 estimate")
+    plt.xlabel("r")
+    plt.ylabel("a", rotation=0)
+    #plt.title("Heatmap of c2_estimate")
+    plt.savefig(f"figures/c2est.png", dpi=300, bbox_inches="tight")
+
+
+    #divnorm = mcolors.TwoSlopeNorm(vmin=0, vcenter=0, vmax=2)
+
+    heatmap = numpy.full((len(a_vals), len(r_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(r_vals):
+            if (r, a) in outputs:
+                heatmap[i, j] = outputs[(r, a)]['c1_estimate'] - outputs[(r, a)]['c2_estimate']
+
+    # Plot
+    plt.figure(figsize=(8,6))
+    cmap = plt.get_cmap("Reds").copy()  # or whatever cmap you're using
+    cmap.set_bad(color="0.5")  # "0.5" = grey
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[r_vals[0], r_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        #norm=divnorm
+    )
+    plt.colorbar(im)#, label="c2 estimate")
+    plt.xlabel("r")
+    plt.ylabel("a")
+    #plt.title("Heatmap of c diff")
+    #plt.show()
+    plt.savefig(f"figures/cdiff.png", dpi=300, bbox_inches="tight")
+    # make c1 heatmap
+
+def generate_ivp_example_2():
+    # time series for the two primary cases of interest
+    import matplotlib.pyplot as plt
+    a = 0.25
+    r = 0.75
+    map_data = classify_vortkamp_map(r, a)
+    if not map_data['period'] == 2:
+        raise ValueError()
+    u_plus, u_minus = map_data['cycle']
+    solution = solve_ide(
+        growth_map = vortkamp_map(r, a),
+        kernel_density_fn=laplace_kernel(),
+        initial_data=lambda x: numpy.heaviside(-x, 1),
+        xmin=-100,
+        xmax=100,
+        kernel_radius=4,
+        dx=0.01,
+        n_steps=100
+    )
+    # plot heatmap
+    plt.figure()
+
+
+    # # define the colormap function...
+    # def rgb_func(u):
+    #     r = u
+    #     g = 1 - u
+    #     b = 0.5*numpy.sin(4*numpy.pi*u) + 0.5
+    #     return r, g, b
+
+    # # Sample it
+    # u = numpy.linspace(0,1,256)
+
+    # Example usage:
+    from matplotlib.colors import LinearSegmentedColormap
+
+    points = [
+        (0, (1, 1, 1)),   # red at 0.2
+        #(a, (1, 0.5, 0)),   # red at 0.2
+        (u_minus, (1, 0.5, 0)),
+        (1, (1, 0, 0)),   # green at 0.5
+        (u_plus, (0, 0, 1))    # blue at 0.8
+    ]
+    #print(points)
+    u_min, u_max = points[0][0], points[-1][0]
+    points_norm = [((u - u_min) / (u_max - u_min), c) for u, c in points]
+
+    # Extract positions and colors
+    us, cs = zip(*points_norm)
+
+    # Build colormap
+    cmap = LinearSegmentedColormap.from_list("linear_custom", list(zip(us, cs)), N=256)
+
+    
+
+    #cmap = LinearSegmentedColormap.from_list("my_map", colors, N=256)
+
+    #plt.imshow(Z, cmap=cmap, origin="lower")
+    #plt.text(0.1, 50, "≈ 1", color="red", fontsize=12, ha="left", va="center")
+    #plt.text(0.8, 20, "≈ u+", color="blue", fontsize=12, ha="right", va="center")
+    import matplotlib.patches as mpatches
+
+    red_patch = mpatches.Patch(color=(1,0,0), label="u(x, t) ≈ 1")
+    blue_patch = mpatches.Patch(color=(0,0,1), label="u(x, t) ≈ u+")
+    white_patch = mpatches.Patch(color=(1, 1,1), label="u(x, t) ≈ 0")
+    plt.legend(handles=[red_patch, blue_patch, white_patch], loc="upper right")
+    
+
+    im = plt.imshow(solution['solution'][::2,:], extent=[solution['domain'][0], solution['domain'][-1], len(solution['solution']), 0], cmap=cmap, aspect='auto', interpolation='none')
+    cbar = plt.colorbar(im)
+    #cbar.set_label("u", rotation=0)
+    cbar.set_ticks([0, a, u_minus, 1, u_plus])
+    cbar.set_ticklabels(["0", f"a = {a}", f"u- ≈ {u_minus:.2f}", "1", f"u+ ≈ {u_plus:.2f}"])
+    plt.xlabel("location, x")
+    plt.ylabel("time, t (even)", rotation=0, labelpad=20)
+    plt.savefig(f"figures/example_spacetime2.png", dpi=300, bbox_inches="tight")
+
+def continuation_problem():
+    a = 0.1
+    r = 0.23
+    #a = 0.4
+    #r = 1.5
+    map_data = classify_vortkamp_map(r, a)
+    if not map_data['period'] == 2:
+        raise ValueError()
+    u_plus, u_minus = map_data['cycle']
+    T0 = 10
+    T1 = 20
+    T2 = 100
+    solution = simulate_leading_wave_continuation(
+        r, a, kernel_density_fn=laplace_kernel(), T0=T0, T1=T1, T2=T2,
+        domain_radius=80,
+        dx=0.01,
+        kernel_radius=4,
+    )
+    # generate marks?
+    u = solution['solution']
+    plt.plot(numpy.diff(solution['marks']))
+    plt.show()
+
+    plt.figure()
+
+
+    # # define the colormap function...
+    # def rgb_func(u):
+    #     r = u
+    #     g = 1 - u
+    #     b = 0.5*numpy.sin(4*numpy.pi*u) + 0.5
+    #     return r, g, b
+
+    # # Sample it
+    # u = numpy.linspace(0,1,256)
+
+    # Example usage:
+    from matplotlib.colors import LinearSegmentedColormap
+
+    import matplotlib.colors as mcolors
+
+    points = [
+        (0, (1, 1, 1)),
+        (u_minus, (1, 0.5, 0)),
+        (1, (1, 0, 0)),
+        (u_plus, (0, 0, 1)),   # <-- top endpoint is u_plus
+    ]
+
+    # Normalize positions onto [0,1]
+    u_min, u_max = 0, u_plus
+    points_norm = [((u - u_min)/(u_max - u_min), c) for u, c in points]
+    us, cs = zip(*points_norm)
+    cmap = LinearSegmentedColormap.from_list("linear_custom", list(zip(us, cs)), N=256)
+
+    # Important: tell matplotlib how to map your data values into [0,1]
+    norm = mcolors.Normalize(vmin=0, vmax=u_plus)
+
+    
+
+    #cmap = LinearSegmentedColormap.from_list("my_map", colors, N=256)
+
+    #plt.imshow(Z, cmap=cmap, origin="lower")
+    #plt.text(0.1, 50, "≈ 1", color="red", fontsize=12, ha="left", va="center")
+    #plt.text(0.8, 20, "≈ u+", color="blue", fontsize=12, ha="right", va="center")
+    import matplotlib.patches as mpatches
+
+    red_patch = mpatches.Patch(color=(1,0,0), label="u(x, t) ≈ 1")
+    blue_patch = mpatches.Patch(color=(0,0,1), label="u(x, t) ≈ u+")
+    white_patch = mpatches.Patch(color=(1, 1,1), label="u(x, t) ≈ 0")
+    plt.legend(handles=[red_patch, blue_patch, white_patch], loc="upper right")
+    
+
+    # im = plt.imshow(solution['solution'][::2,:], extent=[solution['domain'][0], solution['domain'][-1], len(solution['solution']), 0], cmap=cmap, norm=norm, aspect='auto', interpolation='none')
+    # cbar = plt.colorbar(im)
+    # #cbar.set_label("u", rotation=0)
+    # cbar.set_ticks([0, a, u_minus, 1, u_plus])
+    # cbar.set_ticklabels(["0", f"a = {a}", f"u- ≈ {u_minus:.2f}", "1", f"u+ ≈ {u_plus:.2f}"])
+    # plt.xlabel("location, x")
+    # plt.ylabel("time, t (even)", rotation=0, labelpad=20)
+    # plt.savefig(f"figures/continuation.png", dpi=300, bbox_inches="tight")
+
+    nt = len(solution['solution'])  # number of time steps you plotted
+    times = numpy.linspace(0, T2, nt)
+
+    # Build r(t): constant at 0.2 until T0, linear up to 0.8 by T1, then constant
+    rm = a/(1-a)
+    r = r
+    r_vals = numpy.piecewise(
+        times,
+        [times <= T0, (times > T0) & (times <= T1), times > T1],
+        [
+            rm,
+            lambda t: rm + (r - rm) * (t - T0) / (T1 - T0),
+            r,
+        ],
+    )
+
+    fig, (ax_main, ax_r) = plt.subplots(
+        1, 2, gridspec_kw={'width_ratios': [12, 4]}, sharey=True, figsize=(10, 6)
+    )
+    ax_r.set_ylim(0, nt)
+
+    # --- main space–time plot ---
+    im = ax_main.imshow(
+        solution['solution'][::2, :],
+        extent=[solution['domain'][0], solution['domain'][-1], nt, 0],
+        cmap=cmap,
+        norm=norm,
+        aspect='auto',
+        interpolation='none',
+    )
+    cbar = fig.colorbar(im, ax=ax_main)
+    cbar.set_ticks([0, a, u_minus, 1, u_plus])
+    cbar.set_ticklabels(["0", f"a = {a}", f"u- ≈ {u_minus:.2f}", "1", f"u+ ≈ {u_plus:.2f}"])
+    ax_main.set_xlabel("location, x")
+    ax_main.set_ylabel("time, t (even)", rotation=0, labelpad=40)
+
+    # --- r(t) plot ---
+    ax_r.plot(r_vals, numpy.arange(nt), color="black")
+    ax_r.set_xlim(0, r*1.2)
+    ax_r.set_xticks([rm, r])
+    ax_r.set_xticklabels([f"r_m(a) ≈ {rm:.2f}", f"r ≈ {r:.2f}"])
+    ax_r.set_xlabel("growth rate, r(t)")
+    ax_r.invert_yaxis()  # so time increases downward, consistent with main plot
+
+    fig.tight_layout()
+    plt.savefig("figures/continuation_with_r.png", dpi=300, bbox_inches="tight")
+
+
+    # generate the time series plots?
+    plt.figure()
+    #plt.plot(solution['solution'][10])
+    #plt.plot(solution['solution'][20])
+    plt.plot(solution['solution'][T2])
+    plt.savefig("figures/continuation_timeseries.png", dpi=300, bbox_inches="tight")
+    
+
+
+
+
+
+if __name__ == "__main__":
+
+    #generate_growth_map_figure()
+
+    #generate_timeseries_figures()
+
+    #generate_leading_trailing_heatmap()
+    
+    # test some plots...
+    #generate_ivp_example_2()
+    continuation_problem()
+    # a = 0.1
+    # #r = 0.62
+    # for r in numpy.arange(0, 2, 0.01):
+    #     data = classify_vortkamp_map(r, a)
+        
+    #     if not data['period'] == 2:
+    #         continue
+    #     u_plus = data['cycle'][0]
+    #     soln = solve_ide(
+    #         growth_map=vortkamp_map(r,a),
+    #         kernel_density_fn=laplace_kernel(),
+    #         initial_data=lambda x:numpy.heaviside(-x,1),#*u_plus,
+    #         xmin=-5,
+    #         xmax=20,
+    #         kernel_radius=8,
+    #         dx=0.002,
+    #         n_steps=30,
+    #     )
+    #     plt.imshow(soln['solution'],aspect='auto')
+    #     plt.show()
