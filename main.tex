@@ -19,7 +19,7 @@
 % \usepackage{newpxtext,newpxmath}
 
 \theoremstyle{definition}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{theorem}{Theorem}%[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{definition}[theorem]{Definition}
@@ -118,6 +118,68 @@ $$u^* = \frac{1}{4}\left(a+1+\sqrt{(a+1)^2+\frac{8a}{r}}\right) $$
 \end{enumerate}
 \end{proposition}
 
+\subsection{Traveling waves}
+
+In this section, we describe the traveling waves we are interested in.
+
+A traveling wave connecting $1$ to $0$, which is bistable when $r<r_1$ and monostable when $r>r_1$:
+\begin{equation} \tag{TW}
+Qw_1(x)=w_1(x-c_1), \quad w_1(-\infty)=1, \quad w_1(+\infty)=0 \label{eq}
+\end{equation}
+
+When $\{u^+,u^-\}$ form a stable $2$-cycle, a monostable $2$-periodic wave connecting $u^\pm$ to $1$:
+\begin{equation} \tag{MPTW}
+Q^2w_2(x)=w_2(x-2c_2), \quad w_2(-\infty)=u^+, \quad w_2(+\infty)=1
+\end{equation}
+
+When $\{u^+,u^-\}$ form a stable $2$-cycle, a bistable $2$-periodic wave connecting $u^\pm$ directly to $0$:
+\begin{equation} \tag{BPTW}
+Q^2w(x)=w(x-2c), \quad w(-\infty)=u^+, \quad w(+\infty)=0
+\end{equation}
+
+
+\subsection{Initial value problems}
+
+We are also interested in the following initial value problems, both when $r_1 < r < r_2$:
+
+With step initial data:
+\begin{equation} \tag{IVP}
+\begin{aligned}
+u_{t+1} &= Qu_t \\
+u_0(x) &= \begin{cases} u^+ & x \leq 0 \\ 0 & u > 0 \end{cases}
+\end{aligned}
+\end{equation}
+and with compact initial data on an interval of radius $R>0$:
+\begin{equation} \tag{IVP}
+\begin{aligned}
+u_{t+1} &= Qu_t \\
+u_0(x) &= \begin{cases} u^+ & |x| \leq R \\ 0 & |x| > R \end{cases}
+\end{aligned}
+\end{equation}
+
+% \subsection{Definitions}
+
+% We will alternatively refer to periodic traveling wave (PTW) solutions vs profiles.
+% \begin{itemize}
+% \item A PTW solution is a sequence $u_t(x)$ satisfying $u_{t+p}(x-cp)$
+% \end{itemize}
+
+% For convenience; TODO: remove later.
+
+% \begin{enumerate}
+% \item A sequence $u_t(x)$ is called a traveling wave solution with velocity $c$ if $u_{t+1}(x)=u_t(x-c)$.
+% \item Equivalently, a traveling wave can be written as $u_t(x)=w(x-ct)$ where $w$ is called the traveling wave profile, satisfying $Qw(x)=w(x-c)$ and $w(\pm\infty)=\ell^\pm$.
+% \item It is called a traveling front connecting $\ell^-$ to $\ell^+$ if we add the conditions $u_t(\pm\infty)=\pm\ell$, where necessarily $\ell\pm$ are fixed points of $g$.
+% \item $u_t$ is called a periodic traveling wave with period $p$ connecting $\ell^-$ to $\ell^+$ with mean velocity $c$ if $u_{t+p}(x)=u_t(x-cp)$ and $u_t(\pm\infty)=g^t(\ell\infty)$, where necessarily $\ell^\pm$ are $p$-periodic points of $g$.
+% \item Equivalently, a periodic traveling wave can be written as $u_t(x)=w_t(x-ct)$ where $w_t$ is called the periodic traveling wave profile, satisfying $Q^pw(x)=w(x-cp)$ and $w_t(\pm\infty)=g^t(\ell^\pm)$.
+% \end{enumerate}
+
+% \begin{itemize}
+% \item Every PTW solution is a TW solution with $p=1$.
+% \item Every PTW profile $w_t$ is a TW profile with $w_t$ constant in $t$. 
+% \item If $w_t$ is a PTW profile then $w_{t+p}=w_t$.
+% \end{itemize}
+
 
 \subsection{Case 1: monotone growth}
 
@@ -125,9 +187,8 @@ When the growth function is monotone, we can apply the results of \cite{LO22} to
 
 \begin{proposition}
 Suppose $r\leq r_m$.
-Then there exists a unique $c^*$ such that there exists a nonincreasing traveling wave $w \in C(\mathbb{R},[0,1])$ such that
-$$ Qw(x)=w(x-c^*) $$
-with $w(-\infty)=1$ and $w(\infty)=0$.
+Then there exists a unique $c_1^*$ such that there exists a nonincreasing traveling wave $w_1 \in C(\mathbb{R},[0,1])$ such that
+$$ Qw_1(x)=w_1(x-c_1^*), \quad w_1(-\infty)=1, \quad w_1(+\infty)=0 $$
 \end{proposition}
 
 \subsection{Case 2: nonmonotone growth, stable carrying capacity}
@@ -137,19 +198,19 @@ with $w(-\infty)=1$ and $w(\infty)=0$.
 When $r_1 < r < r_m^1$ we can apply the results of Theorem 3.1 in \cite{BLL18}:
 
 \begin{proposition}
-Suppose $r_1 < r \leq r_m^1$ (so that $g^2$ is monotone on $[u^-,u^=]$). Then there exists a {\it spreading speed} $c^*_{(1,u^+)}$ for the double-iterate operator $Q^2$ from $1$ to $u^+$. This means:
+Suppose $r_1 < r \leq r_m^1$ (so that $g^2$ is monotone on $[u^-,u^+]$). Then there exists a {\it spreading speed} $c_2^*$ for the double-iterate operator $Q^2$ from $1$ to $u^+$. This means:
 \begin{enumerate}
 \item for any initial data $u_0 \in C(\mathbb{R},[1,u^+])$ with $u_0(x)=1$ outside a compact set, then
-$$ \lim_{t\to\infty} \sup_{|x| \geq ct} Q^{2t} u_0(x) = 1, \quad \forall c > c^* $$
+$$ \lim_{t\to\infty} \sup_{|x| \geq ct} Q^{2t} u_0(x) = 1, \quad \forall c > c_2^* $$
 \item for any initial data $u_0 \neq 1$,
-$$ \lim_{t\to\infty} \inf_{|x| \leq ct} Q^{2t}u_0(x) = u^+, \quad \forall c \in (0,c^*) $$
+$$ \lim_{t\to\infty} \inf_{|x| \leq ct} Q^{2t}u_0(x) = u^+, \quad \forall c \in (0,c_2^*) $$
 \end{enumerate}
 \end{proposition}
 
 We also get the existence of traveling waves from Theorem 3.2 in \cite{BLL18}:
 
 \begin{proposition}
-If $r_1 < r \leq r_m^1$, then with $c^*$ given in the previous theorem, there exists a monotone traveling wave solution $u_t(x)=w(x-ct)$ such that $w(-\infty)=u^+$ and $w(\infty)=1$.
+If $r_1 < r \leq r_m^1$, then with $c_2^*$ given in the previous theorem, there exists a monotone traveling wave solution $u_{2t}(x)=w_2(x-2c_2^*t)$ such that $w_3(-\infty)=u^+$ and $w_2(+\infty)=1$.
 \end{proposition}
 
 TODO: more here?
@@ -159,7 +220,7 @@ TODO: more here?
 
 \section{Numerical simulations and conjectures}
 
-\subsection{Stable $2$-cycle and step initial data}
+\subsection{The initial value problem with step initial data connecting $u^+$ to $0$}
 
 In this section we consider the initial value problem
 \begin{equation} \label{ivp} \begin{aligned}
@@ -167,39 +228,80 @@ u_0(x) &= \begin{cases} u^+ & x \leq 0 \\ 0 & x > 0 \end{cases} \\
 u_{t+1}(x) &= Qu_t(x)
 \end{aligned} \end{equation}
 when the growth function has a stable $2$-cycle, i.e. when $r_1(a) < r < r_2(a)$.
+Our basic observation, as depicted in \autoref{fig:fig1}, is that depending on the choice of parameters, the solution converges either to a 2-periodic {\it bistable wave} directly connecting $u^+$ to $0$, or a pair of {\it stacked waves} moving at different velocities connecting $u^+$ to $1$ and $1$ to $0$ respectively.
 
-Our basic observation, as depicted in \autoref{fig:fig1}, is that the solution falls in one of two cases:
-\begin{enumerate}
-\item converges uniformly to a $2$-periodic traveling wave connecting $u^\pm$ to $0$, that is, we have
-$$ u_t(x) - w_t(x-ct) \xrightarrow{\text{unif.}} 0$$
-for some $w_t$ and $c$ satisfying:
-\begin{enumerate}
-\item $w_0(-\infty)=u^+$,
-\item $w_0(\infty)=0$,
-\item $Q^2w_t(x)=w_t(x-2c)$,
-\item $w_{t+2}=w_t$.
-\end{enumerate}
-\item converges to a pair of stacked traveling waves, TODO: explain
-\end{enumerate}
+We make this prediction precise in the following conjecture:
+\begin{conjecture}
+The solution $u_t(x)$ to the initial value problem \eqref{ivp} falls in one of two cases depending on the growth parameters $(a, r)$:
+\begin{itemize}
+\item Case 1 (stacked wave): the solution converges uniformly to a superposition of traveling waves, that is
+$$ \sup_{x \in \mathbb{R}}\|u_{2t}(x)-w_1(x - 2c_1t)-w_2(x- 2c_2t)+1\|_\infty \to 0 $$
+where $w_1$ is a solution to \eqref{w1} and $w_2$ is a solution to \eqref{w2}.
+\item Case 2 (bistable wave): the solution converges uniformly to a bistable traveling wave, that is
+$$ \sup_{x \in \mathbb{R}}\|u_{2t}(x)-w(x - 2c_2t)\|_\infty \to 0 $$
+where $w$ is a solution to \eqref{w}
+\end{itemize}
+\end{conjecture}
 
-To distinguish these cases, we define the following sequence of front-tracking points, depending on $\epsilon>0$:
-$$ \alpha_t(\epsilon) = \sup\{ x \mid |u_{2t}(x) - u^+| \geq \epsilon \}$$
-and
-$$ \beta_t(\epsilon) = \inf\{ x \mid |u_{t}(x)| \geq \epsilon \}$$
-and defined
-$$ \tilde c_2(\epsilon) = \alpha_{t+1}(\epsilon)-\alpha_t(\epsilon),\quad \tilde c_1(\epsilon) = \beta_{t+1}(\epsilon)-\beta_t(\epsilon) $$
-\begin{proposition}
-If the solution falls into Case 1, then for sufficiently small $\epsilon$,
-$$ \lim_{t\to\infty}\tilde c_1(\epsilon)=\lim_{t\to\infty}\tilde c_2(\epsilon)=c $$
-Otherwise, if the solution falls into Case 2, assuming $\sup_x w_1(x) < u^+$ and $\inf_x w_2(x)>0$, then for sufficiently small $\epsilon$,
-$$ \lim_{t\to\infty} \tilde c_1(\epsilon)=c_1, \quad \lim_{t\to\infty}\tilde c_2(\epsilon)=c_2 $$
-\end{proposition}
+\begin{remark}
+Notice that our characterization of stacked waves only requires uniform convergence on compact sets.
+\end{remark}
 
-\begin{proof}
-TODO. Appendix?
-\end{proof}
 
-Based on these observations, we conducted a parameter sweep to estimate the difference $\tilde c_1 - \tilde c_2$.
+
+% \begin{enumerate}
+% \item $w_0(-\infty)=u^+$,
+% \item $w_0(+\infty)=0$,
+% \item $Q^2w_t(x)=w_t(x-2c)$,
+% \item $w_{t+2}=w_t$.
+% \end{enumerate}
+% \item converges to a pair of stacked traveling waves, TODO: explain
+% \end{enumerate}
+
+Based on this conjecture, we can design a numerical experiment to estimate the wave speeds in either case.
+Attach to the solution the following sequence of front-tracking points, for a given $\epsilon>0$:
+$$ \alpha_t = \sup \{ x \mid |u_t(x) - g^t(u^+)| \geq \epsilon \}, \quad \beta_t = \inf \{ x \mid |u_t(x)| \geq \epsilon \} $$
+
+and the wave speed estimates
+$$ c_2(t)=\frac{1}{2}(\alpha_{t+2}-\alpha_t), \quad c_1(t)=\beta_{t+1}-\beta_t $$
+
+
+
+Our next plot is based on the following observation:
+$$ \lim_{t\to\infty}c_t^+(u^+,\epsilon)-c_t^-(0,\epsilon) = \begin{cases}
+0 & \text{in case 1} \\
+c_1-c_2 & \text{in case 2}
+\end{cases} $$
+\autoref{fig:cdiff} shows the result of approximating the above limit for a range of $(a, r)$ values.
+We observe that both behaviors occur on a nontrivial region of parameter space.
+
+A couple more conjectures to organize: (TODO)
+
+\begin{conjecture}
+Suppose 
+\end{conjecture}
+
+\begin{conjecture}
+For sufficiently small $a \in (0,1)$ there exists a threshold $r_{thres}(a) \in (r_1(a),r_2(a))$ below which case 2 occurs, and above which case 1 occurs.
+\end{conjecture}
+
+% $$ \alpha_t(\epsilon) = \sup\{ x \mid |u_{2t}(x) - u^+| \geq \epsilon \}$$
+% and
+% $$ \beta_t(\epsilon) = \inf\{ x \mid |u_{t}(x)| \geq \epsilon \}$$
+% and defined
+% $$ \tilde c_2(\epsilon) = \alpha_{t+1}(\epsilon)-\alpha_t(\epsilon),\quad \tilde c_1(\epsilon) = \beta_{t+1}(\epsilon)-\beta_t(\epsilon) $$
+% \begin{proposition}
+% If the solution falls into Case 1, then for sufficiently small $\epsilon$,
+% $$ \lim_{t\to\infty}\tilde c_1(\epsilon)=\lim_{t\to\infty}\tilde c_2(\epsilon)=c $$
+% Otherwise, if the solution falls into Case 2, assuming $\sup_x w_1(x) < u^+$ and $\inf_x w_2(x)>0$, then for sufficiently small $\epsilon$,
+% $$ \lim_{t\to\infty} \tilde c_1(\epsilon)=c_1, \quad \lim_{t\to\infty}\tilde c_2(\epsilon)=c_2 $$
+% \end{proposition}
+
+% \begin{proof}
+% TODO. Appendix?
+% \end{proof}
+
+% Based on these observations, we conducted a parameter sweep to estimate the difference $\tilde c_1 - \tilde c_2$.
 
 \begin{figure}[htbp]
     \centering
@@ -281,7 +383,7 @@ Our main conjecture is the following:
 
 \section{Appendix}
 
-\subsection{Comments on wave trains}
+\subsection{Traveling waves and stacked waves}
 
 In this section we comment on the analytical interpretation of so-called `wave-train' solutions, aka stacked traveling waves or terraces.
 
@@ -293,6 +395,8 @@ $$ u_t(x)=w(x-ct) $$
 where $w$ is a solution to the equation
 $$ Qw(x)=w(x-c) $$
 We may call $w$ a traveling wave profile with velocity $c$.
+\item A traveling front is a traveling waves with limits at $\pm \infty$, which are necessarily both fixed points of $g$, that is
+$$ g(u_t(\pm\infty)) = u_t(\pm\infty) $$
 \item A solution $u_t(x)$ is called a periodic traveling wave with period $p$ and mean velocity $c$ if it satisfies $$ u_{t+p}(x)=u_t(x-cp) $$
 Any periodic traveling wave has the form
 $$ u_t(x)=w_t(x-pc) $$
@@ -301,21 +405,25 @@ $$ Q^pw_t(x)=w_t(x-pc) $$
 and is periodic in $t$,
 $$ w_{t+p}=w_t $$
 We can say that $w_t$ is a periodic traveling wave profile.
+\item A $p$-periodic traveling front is a $p$-periodic traveling wave with limits at $\pm\infty$, which are necessarily both $p$-periodic points of $g$, that is,
+$$ g^p(u_t(\pm\infty)) = u_t(\pm\infty) $$
 \item Alternatively we can just define a periodic traveling wave of $Q$ to be a traveling wave of $Q^p$.
 \item We say that a solution $u_t(x)$ converges uniformly to a traveling wave if
 $$ \lim_{t \to \infty} \sup_{x \in \mathbb{R}} |u_t(x)-w(x-c)| = 0 $$
 where $w_t$ is a traveling wave profile with velocity $c$.
 \item We say that a solution $u_t(x)$ converges uniformly to a periodic traveling wave if
 $$ \lim_{t \to \infty} \sup_{x \in \mathbb{R}} |u_t(x)-w_t(x-pc)| = 0 $$
-where $w_t$ is a periodic traveling wave profile with velocity $c$.
+where $w_t$ is a periodic traveling wave profile with mean velocity $c$.
 \end{enumerate}
+
+It's not immediately clear how to adopt the above definitions to convergence to a stacked wave.
 
 % \begin{proposition}
 % Suppose $u_t(x)=w(x-c^*t)$ is a traveling wave solution with velocity $c^*$, and suppose $w$ has limits at $\pm\infty$ Then:
 % \begin{enumerate}
 % \item If $c<c^*$ then $u_t(x+ct) \to w(-\infty)$ uniformly on compact sets.
 % \item If $c=c^*$ then $u_t(x+ct) \to w$ uniformly.
-% \item If $c>c^*$ then $u_t(x+ct) \to w(\infty)$ uniformly on compact sets.
+% \item If $c>c^*$ then $u_t(x+ct) \to w(+\infty)$ uniformly on compact sets.
 % \end{enumerate}
 % \begin{proof}
 % \begin{enumerate}
@@ -343,7 +451,7 @@ for some traveling wave profile $w$ with velocity $c^*$, and suppose $w$ has lim
 \begin{enumerate}
 \item If $c<c^*$ then $u_t(x+ct) \to w(-\infty)$ uniformly on compact sets.
 \item If $c=c^*$ then $u_t(x+ct) \to w$ uniformly.
-\item If $c>c^*$ then $u_t(x+ct) \to w(\infty)$ uniformly on compact sets.
+\item If $c>c^*$ then $u_t(x+ct) \to w(+\infty)$ uniformly on compact sets.
 \end{enumerate}
 \begin{proof}
 \begin{enumerate}

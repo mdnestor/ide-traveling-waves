@@ -1199,8 +1199,8 @@ def generate_leading_trailing_heatmap():
             map_data = classify_vortkamp_map(r, a)
             if map_data['cycle'] is None:
                 continue
-            if map_data['period'] == 1:
-                continue
+            #if map_data['period'] == 1:
+            #    continue
             if map_data['period'] != 2:
                 continue
             
@@ -1563,8 +1563,264 @@ def continuation_problem():
     
 
 
+def generate_leading_trailing_heatmap_sparameterization():
+    # idea: for a range of (a, r) values
+    # calculate the leading wavefront, the trailing wavefront, etc
+    a_vals = numpy.linspace(0, 1, 200)
+    s_vals = numpy.linspace(0, 1, 200)
+    #r_vals = []
+    outputs = {}
+    for i, a in enumerate(a_vals):
+        for j, s in enumerate(s_vals):
+            r = s / (1 - s)
+            # do thing
+            map_data = classify_vortkamp_map(r, a)
+            if map_data['cycle'] is None:
+                continue
+            #if map_data['period'] == 1:
+            #    continue
+            if map_data['period'] != 2:
+                continue
+            
+            u_plus = map_data['cycle'][0]
+
+            # set up IVP
+            #g = vortkamp_map(r, a)
+            #u = [1 + 0.001]
+            #for t in range(100):
+            #    u.append(g(u[-1]))
+            #u_plus = max(u)
+            #print(u_plus)
+
+            n_transient_steps = 0
+            assert(n_transient_steps % 2 == 0)
+            
+            
+            # g = vortkamp_map(r, a)
+            #u_plus = classification['u_plus']
+            dx = 0.02 # TODO
+            g = vortkamp_map(r, a)
+            tol = min(u_plus - 1, a) / 10
+            soln = solve_ide_step_data_adaptive(
+                growth_map = g,
+                kernel_density_fn = laplace_kernel(), # todo
+                u_left = u_plus,
+                u_right = 0,
+                dx = dx,
+                kernel_radius = 4,
+                n_steps = 30,
+                tol = tol, # TODO
+                normalize_kernel = True
+            )
+            domain = soln['domain']
+            soln = soln['solution']
+            xmin = min(domain)
+            
+            soln = soln[n_transient_steps:,:]
+
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t]) >= tol)[0][-1]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            #print(marks[-1])
+            c1_estimate = (marks[-1] - marks[-2])
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t] - soln[t][0]) >= tol)[0][0]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            c2_estimate = (marks[-1] - marks[-3]) / 2
+
+            outputs[(i, j)] = {
+                'domain': domain,
+                'solution': soln,
+                'c1_estimate': c1_estimate,
+                'c2_estimate': c2_estimate,
+            }
+
+            # if
+            #if c1_estimate - c2_estimate > 0.5:
+            #    plt.imshow(soln, aspect='auto')
+            #    plt.show()
+
+    #for ((r, a), output) in outputs.items():
+    #    print(r, a, output)
+    
+
+    import matplotlib.colors as mcolors
+
+    divnorm = mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
+    heatmap = numpy.full((len(a_vals), len(s_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(s_vals):
+            if (i, j) in outputs:
+                heatmap[i, j] = outputs[(i, j)]['c1_estimate'] - outputs[(i, j)]['c2_estimate']
+
+    plt.figure(figsize=(8,6))
+    cmap = plt.get_cmap("Reds").copy()  # or whatever cmap you're using
+    cmap.set_bad(color="0.5")  # "0.5" = grey
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[s_vals[0], s_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        norm=divnorm
+    )
+    plt.colorbar(im)#, label="c2 estimate")
+    plt.xlabel("s = r / (1 - r)")
+    plt.ylabel("a")
+    #plt.title("Heatmap of c diff")
+    #plt.show()
+    plt.savefig(f"figures/cdiff.png", dpi=300, bbox_inches="tight")
+    # make c1 heatmap
 
 
+def generate_leading_trailing_heatmap_sparameterization():
+    # idea: for a range of (a, r) values
+    # calculate the leading wavefront, the trailing wavefront, etc
+    a_vals = numpy.linspace(0, 1, 100)
+    s_vals = numpy.linspace(0, 1, 100)
+    #r_vals = []
+    outputs = {}
+    for i, a in enumerate(a_vals):
+        for j, s in enumerate(s_vals):
+            r = s / (1 - s)
+            g = vortkamp_map(r, a)
+            # do thing
+            map_data = classify_vortkamp_map(r, a)
+            if map_data['cycle'] is None:
+                continue
+            #if map_data['period'] == 1:
+            #    continue
+            if map_data['period'] > 2:
+                continue
+            period = map_data['period']
+
+            u_plus = map_data['cycle'][0]
+            u_minus = g(u_plus)
+
+            # set up IVP
+            #g = vortkamp_map(r, a)
+            #u = [1 + 0.001]
+            #for t in range(100):
+            #    u.append(g(u[-1]))
+            #u_plus = max(u)
+            #print(u_plus)
+
+            n_transient_steps = 0
+            assert(n_transient_steps % 2 == 0)
+            
+            
+            # g = vortkamp_map(r, a)
+            #u_plus = classification['u_plus']
+            dx = 0.05 # TODO
+            if map_data['period']  == 1:
+                tol = 1/2 * 0.01
+            else:
+                tol = min(u_plus - 1, 1 - u_minus, u_minus) / 2 * 0.01
+            soln = solve_ide_step_data_adaptive(
+                growth_map = g,
+                kernel_density_fn = laplace_kernel(), # todo
+                u_left = u_plus,
+                u_right = 0,
+                dx = dx,
+                kernel_radius = 4,
+                n_steps = 20,
+                tol = tol, # TODO
+                normalize_kernel = True
+            )
+            domain = soln['domain']
+            soln = soln['solution']
+            xmin = min(domain)
+            
+            soln = soln[n_transient_steps:,:]
+
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t]) >= tol)[0][-1]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            #print(marks[-1])
+            c1_estimate = (marks[-1] - marks[-2])
+            marks = []
+            for t in range(len(soln)):
+                mark_i = numpy.where(numpy.abs(soln[t] - soln[t][0]) >= tol)[0][0]
+                mark_x = xmin + mark_i*dx
+                marks.append(mark_x)
+            c2_estimate = (marks[-1] - marks[-3]) / 2
+
+            outputs[(i, j)] = {
+                'domain': domain,
+                'solution': soln,
+                'c1_estimate': c1_estimate,
+                'c2_estimate': c2_estimate,
+                'c_delta': None if period == 1 else c1_estimate - c2_estimate
+            }
+
+            # if
+            #if c1_estimate - c2_estimate > 0.5:
+            #    plt.imshow(soln, aspect='auto')
+            #    plt.show()
+
+    #for ((r, a), output) in outputs.items():
+    #    print(r, a, output)
+    
+
+    import matplotlib.colors as mcolors
+
+#divnorm = mcolors.CenteredNorm(vcenter=0)#mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
+    heatmap = numpy.full((len(a_vals), len(s_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(s_vals):
+            if (i, j) in outputs:
+                heatmap[i, j] = outputs[(i, j)]['c1_estimate'] #- outputs[(i, j)]['c2_estimate']
+
+    plt.figure(figsize=(8,6))
+    cmap = plt.get_cmap("seismic").copy()  # or whatever cmap you're using
+    cmap.set_bad(color="0.5")  # "0.5" = grey
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[s_vals[0], s_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        #norm=divnorm
+    )
+    plt.colorbar(im)#, label="c2 estimate")
+    plt.xlabel("s = r / (1 - r)")
+    plt.ylabel("a")
+    #plt.title("Heatmap of c diff")
+    #plt.show()
+    plt.savefig(f"figures/c1f.png", dpi=300, bbox_inches="tight")
+    # make c1 heatmap
+
+    #divnorm = mcolors.CenteredNorm(vcenter=0)#mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
+    heatmap = numpy.full((len(a_vals), len(s_vals)), numpy.nan)
+    for i, a in enumerate(a_vals):
+        for j, r in enumerate(s_vals):
+            if (i, j) in outputs:
+                heatmap[i, j] = outputs[(i, j)]['c_delta']# - outputs[(i, j)]['c2_estimate']
+
+    plt.figure(figsize=(8,6))
+    cmap = plt.get_cmap("Reds").copy()  # or whatever cmap you're using
+    cmap.set_bad(color="0.5")  # "0.5" = grey
+    im = plt.imshow(
+        heatmap,
+        origin="lower",
+        extent=[s_vals[0], s_vals[-1], a_vals[0], a_vals[-1]],
+        aspect="auto",
+        cmap=cmap,
+        #norm=divnorm
+    )
+    plt.colorbar(im)#, label="c2 estimate")
+    plt.xlabel("s = r / (1 - r)")
+    plt.ylabel("a")
+    #plt.title("Heatmap of c diff")
+    #plt.show()
+    plt.savefig(f"figures/cdiff.png", dpi=300, bbox_inches="tight")
+    # make c1 heatmap
 
 if __name__ == "__main__":
 
@@ -1572,11 +1828,11 @@ if __name__ == "__main__":
 
     #generate_timeseries_figures()
 
-    #generate_leading_trailing_heatmap()
+    generate_leading_trailing_heatmap_sparameterization()
     
     # test some plots...
     #generate_ivp_example_2()
-    continuation_problem()
+    #continuation_problem()
     # a = 0.1
     # #r = 0.62
     # for r in numpy.arange(0, 2, 0.01):

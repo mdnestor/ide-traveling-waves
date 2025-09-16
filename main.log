@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.9.18)  11 SEP 2025 06:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.9.18)  15 SEP 2025 22:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -856,73 +856,126 @@ Overfull \hbox (13.25467pt too wide) in paragraph at lines 64--65
 -te-grod-if-fer-ence equa-tions; nu-mer-i-cally in [[]]
  []
 
-<figures/example_spacetime0.png, id=98, 471.9231pt x 316.7835pt>
+<figures/example_spacetime0.png, id=108, 471.9231pt x 316.7835pt>
 File: figures/example_spacetime0.png Graphic file (type png)
 <use figures/example_spacetime0.png>
 Package pdftex.def Info: figures/example_spacetime0.png  used on input line 75.
 
 (pdftex.def)             Requested size: 234.8775pt x 157.66145pt.
-<figures/example_spacetime1.png, id=100, 471.6822pt x 316.7835pt>
+<figures/example_spacetime1.png, id=110, 471.6822pt x 316.7835pt>
 File: figures/example_spacetime1.png Graphic file (type png)
 <use figures/example_spacetime1.png>
 Package pdftex.def Info: figures/example_spacetime1.png  used on input line 81.
 
 (pdftex.def)             Requested size: 234.8775pt x 157.74364pt.
-<figures/growthmap.png, id=102, 284.9847pt x 268.1217pt>
+<figures/growthmap.png, id=112, 284.9847pt x 268.1217pt>
 File: figures/growthmap.png Graphic file (type png)
 <use figures/growthmap.png>
 Package pdftex.def Info: figures/growthmap.png  used on input line 102.
 (pdftex.def)             Requested size: 234.8775pt x 220.99039pt.
 [2 <./figures/example_spacetime0.png> <./figures/example_spacetime1.png>]
+[3
+pdfTeX warning (ext4): destination with the same identifier (name{equation.2.1}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.158 \end{equation}
+                    
+pdfTeX warning (ext4): destination with the same identifier (name{equation.2.1}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.158 \end{equation}
+                    
+pdfTeX warning (ext4): destination with the same identifier (name{equation.2.1}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.158 \end{equation}
+                     <./figures/growthmap.png>]
 
-LaTeX Warning: Citation 'LO22' on page 3 undefined on input line 124.
+LaTeX Warning: Citation 'LO22' on page 4 undefined on input line 186.
 
 
-LaTeX Warning: Citation 'LO22' on page 3 undefined on input line 124.
+LaTeX Warning: Citation 'LO22' on page 4 undefined on input line 186.
 
 
-LaTeX Warning: Citation 'BLL18' on page 3 undefined on input line 137.
+LaTeX Warning: Citation 'BLL18' on page 4 undefined on input line 198.
 
-[3 <./figures/growthmap.png>]
 
-LaTeX Warning: Citation 'BLL18' on page 4 undefined on input line 149.
+LaTeX Warning: Citation 'BLL18' on page 4 undefined on input line 210.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 162.
+(hyperref)                removing `math shift' on input line 223.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 162.
+(hyperref)                removing `superscript' on input line 223.
 
-<figures/cdiff.png, id=132, 472.164pt x 383.5128pt>
-File: figures/cdiff.png Graphic file (type png)
-<use figures/cdiff.png>
-Package pdftex.def Info: figures/cdiff.png  used on input line 206.
-(pdftex.def)             Requested size: 234.8775pt x 190.77866pt.
-[4]
 
-Package caption Warning: \label without proper reference on input line 230.
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 223.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 223.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 223.
+
+[4
+pdfTeX warning (ext4): destination with the same identifier (name{equation.2.1}
+) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.237 \item C
+             ase 1 (stacked wave): the solution converges uniformly to a sup...
+]
+
+LaTeX Warning: Reference `w1' on page 5 undefined on input line 239.
+
+
+LaTeX Warning: Reference `w2' on page 5 undefined on input line 239.
+
+
+LaTeX Warning: Reference `w' on page 5 undefined on input line 242.
+
+
+Package caption Warning: \label without proper reference on input line 320.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:ivp2' on page 5 undefined on input line 216.
+LaTeX Warning: Reference `fig:cdiff' on page 5 undefined on input line 286.
 
-<figures/example_spacetime2.png, id=150, 471.6822pt x 316.7835pt>
+<figures/cdiff.png, id=159, 472.164pt x 383.5128pt>
+File: figures/cdiff.png Graphic file (type png)
+<use figures/cdiff.png>
+Package pdftex.def Info: figures/cdiff.png  used on input line 319.
+(pdftex.def)             Requested size: 234.8775pt x 190.77866pt.
+
+Package caption Warning: \label without proper reference on input line 342.
+See the caption package documentation for explanation.
+
+
+LaTeX Warning: Reference `fig:ivp2' on page 5 undefined on input line 329.
+
+[5]
+<figures/example_spacetime2.png, id=173, 471.6822pt x 316.7835pt>
 File: figures/example_spacetime2.png Graphic file (type png)
 <use figures/example_spacetime2.png>
-Package pdftex.def Info: figures/example_spacetime2.png  used on input line 228
+Package pdftex.def Info: figures/example_spacetime2.png  used on input line 341
 .
 (pdftex.def)             Requested size: 234.8775pt x 157.74364pt.
-[5 <./figures/cdiff.png>]
-<figures/continuation_with_r.png, id=161, 715.473pt x 426.393pt>
+ [6 <./figures/cdiff.png> <./figures/example_spacetime2.png>]
+<figures/continuation_with_r.png, id=183, 715.473pt x 426.393pt>
 File: figures/continuation_with_r.png Graphic file (type png)
 <use figures/continuation_with_r.png>
-Package pdftex.def Info: figures/continuation_with_r.png  used on input line 26
-1.
+Package pdftex.def Info: figures/continuation_with_r.png  used on input line 37
+4.
 (pdftex.def)             Requested size: 234.8775pt x 139.97491pt.
- [6 <./figures/example_spacetime2.png> <./figures/continuation_with_r.png>] [7]
- [8] [9] (main.aux)
+ [7 <./figures/continuation_with_r.png>] [8] [9] [10] (main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -935,7 +988,7 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: E9DC9B2D397E13E1C1B13A720239A2AC;3028.
+(rerunfilecheck)             Checksum: D3E138B4B0A51950E055F7351B1E3B9B;3564.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                main
@@ -946,10 +999,10 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 20671 strings out of 474486
- 358140 string characters out of 5743755
- 1942542 words of memory out of 5000000
- 42664 multiletter control sequences out of 15000+600000
+ 20685 strings out of 474486
+ 358244 string characters out of 5743755
+ 1943542 words of memory out of 5000000
+ 42670 multiletter control sequences out of 15000+600000
  566613 words of font info for 69 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,13n,81p,736b,1198s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -959,21 +1012,24 @@ ts/cm/cmbx10.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/publ
 ic/amsfonts/cm/cmbx12.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/t
 ype1/public/amsfonts/cm/cmex10.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTe
 X/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/mdnes/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/mdnes/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/mdnes/App
-Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/m
-dnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:
-/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.
-pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
-m/cmr7.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmsy10.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/p
-ublic/amsfonts/cm/cmsy7.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/mdnes/AppData/Local/Programs/MiK
-TeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/mdnes/AppData/Loca
-l/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm7.pfb>
-Output written on main.pdf (9 pages, 682410 bytes).
+ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/mdnes/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/mdnes/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/
+mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C
+:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr1
+7.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
+/cm/cmr5.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/public/a
+msfonts/cm/cmr7.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr8.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/mdnes/AppData/Local/Programs/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/mdnes/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/mdnes/AppData/Lo
+cal/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/md
+nes/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm7.pfb
+>
+Output written on main.pdf (10 pages, 705875 bytes).
 PDF statistics:
- 295 PDF objects out of 1000 (max. 8388607)
- 81 named destinations out of 1000 (max. 500000)
- 151 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 327 PDF objects out of 1000 (max. 8388607)
+ 89 named destinations out of 1000 (max. 500000)
+ 167 words of extra memory for PDF output out of 10000 (max. 10000000)
 
